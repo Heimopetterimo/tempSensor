@@ -95,3 +95,23 @@ class DS18X20:
     def kelvin(self, celsius):
         return celsius + 273.15 if celsius is not None else None
 
+i2c = SoftI2C(scl=Pin(4), sda=Pin(5))    #Init i2c
+oled_width = 128
+oled_height = 64
+oled = SSD1306_I2C(128, 64, i2c)
+pot = machine.Pin(2)
+ds_sensor = ds18x20.DS18X20(onewire.OneWire(pot)) # create the onewire object
+roms = ds_sensor.scan()# scan for devices on the bus
+print('Found DS devices: ', roms) 
+try:
+  while True:
+      ds_sensor.convert_temp()
+      time.sleep_ms(750)    #The reading temperature needs at least 750ms
+      for rom in roms:
+          oled.fill(0)
+          oled.text("Temperature:",10,16)
+          oled.text(str(ds_sensor.read_temp(rom)),24,40)
+          oled.show()  
+except KeyboardInterrupt:
+          pass
+
